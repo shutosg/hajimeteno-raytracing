@@ -25,34 +25,20 @@ class Scene {
 
     // 交点
     Intersection isect = findNearestIntersection(ray);
-    // 何もヒットしてないなら終わり
-    if(!isect.hit()) { return BLACK; }
+    // 何もヒットしてないなら空の色
+    if(!isect.hit()) { return SKY_COLOR; }
 
     Material m = isect.material;
-    Spectrum col = BLACK; // 最終的な計算結果
+    // Spectrum col = BLACK; // 最終的な計算結果
 
-    // 鏡面反射
-    float ks = m.reflective;
-    if(ks > 0) {
-      Vec r = ray.dir.reflect(isect.normal);
-      Spectrum c = trace(new Ray(isect.point, r, true), traceDepth + 1);   // 反射レイを飛ばした結果の色
-      col = col.add(c.scale(ks).mul(m.diffuse)); // 鏡面反射成分色を足す
-    }
-    // 屈折
-    float kt = m.refractive;
-    if(kt > 0) {
-      Vec r = (isect.normal.dot(ray.dir) < 0) ? 
-        ray.dir.refract(isect.normal, VACUUM_REFRACTIVE_INDEX / m.refractiveIndex) : 
-        ray.dir.refract(isect.normal.neg(), m.refractiveIndex / VACUUM_REFRACTIVE_INDEX);
-      Spectrum c = trace(new Ray(isect.point, r, true), traceDepth + 1);
-      col = col.add(c.scale(kt).mul(m.diffuse));
-    }
+    Vec r = isect.normal.randomHemisphere();
+    Spectrum li = trace(new Ray(isect.point, r, true), traceDepth + 1);
+
     // 拡散反射
-    float kd = 1.0 - ks - kt;
-    if(kd > 0) {
-      Spectrum c = this.lighting(isect.point, isect.normal, isect.material);
-      col = col.add(c.scale(kd));
-    }
+    Spectrum fr = m.diffuse.scale(1.0 / PI);
+    float factor = 2.0 * PI * isect.normal.dot(r);
+    Spectrum col = li.mul(fr).scale(factor);
+    
 
     return col;
   }
