@@ -1,13 +1,12 @@
-final int SAMPLE_NUM = 2000;
+final int SAMPLE_NUM = 400;
 final Spectrum SKY_COLOR = new Spectrum(0.7);
 Scene scene = new Scene(); // シーン
-Vec eye = new Vec(0, 0, 7); // 視点
-Vec lookAt = new Vec(0, 0, 0); // 注視点
-float eyeRotZ = 0;
+Camera camera = new Camera();
 
 void setup() {
   size(256, 256);
   initScene();
+  initCamera();
 }
 
 int y = 0;
@@ -40,25 +39,33 @@ void initScene() {
   ));
 
   // 無限平面
-  scene.addIntersectable(new Plane(
+  scene.addIntersectable(new CheckedObj(
+    new Plane(
       new Vec(0, -1, 0), // 位置
       new Vec(0, 1, 0), // 向き
-      new Material(new Spectrum(0.9)) // 材質
-    )
+      new Material(new Spectrum(0.8)) // 材質
+    ),
+    2,
+    new Material(new Spectrum(0.2))
+  ));
+}
+
+void initCamera() {
+  camera.lookAt(
+    new Vec(4.0, 1.5, 6.0),  // 視点
+    new Vec(0.0),            // 注視点
+    new Vec(0.0, 1.0, 0.0),  // 上方向
+    radians(60.0),           // 視野角
+    width,
+    height
   );
 }
 
 // 一次レイを計算
-Ray calcPrimaryRay(int x, int y) {
-  float imagePlane = height;
-
-  float dx =   x + 0.5 - width / 2;
-  float dy = -(y + 0.5 - height / 2);
-  float dz = -imagePlane;
-
-  return new Ray(
-    eye, // 始点
-    new Vec(dx, dy, dz).normalize() // 方向
+Ray getPrimaryRay(int x, int y) {
+  return camera.getRay(
+    x + random(-0.5, 0.5),
+    y + random(-0.5, 0.5)
   );
 }
 
@@ -67,7 +74,7 @@ color calcPixelColor(int x, int y) {
   Spectrum sum = BLACK;
 
   for(int i = 0; i < SAMPLE_NUM; i++) {
-    Ray ray = calcPrimaryRay(x, y);
+    Ray ray = getPrimaryRay(x, y);
     sum = sum.add(scene.trace(ray, 0));
   }
   return sum.scale(1.0 / SAMPLE_NUM).toColor();
