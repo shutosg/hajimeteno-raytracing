@@ -32,10 +32,10 @@ void initScene() {
     new Vec(-2.25, 0, 0), 1, new Material(new Spectrum(0.9, 0.1, 0.5))
   ));
   scene.addIntersectable(new Sphere(
-    new Vec(0, 0, 0),  1, new Material(new Spectrum(0.1, 0.9, 0.5))
+    new Vec(0, 0, 0),  1, new Material(new Spectrum(0.1, 0.9, 0.5), 0.8)
   ));
   scene.addIntersectable(new Sphere(
-    new Vec(2.25, 0, 0),  1, new Material(new Spectrum(0.1, 0.5, 0.9))
+    new Vec(2.25, 0, 0),  1, new Material(new Spectrum(0.1, 0.5, 0.9), 0.0, 0.8, 1.5)
   ));
 
   // 無限平面
@@ -48,11 +48,16 @@ void initScene() {
     2,
     new Material(new Spectrum(0.2))
   ));
+
+  // 光源
+  scene.addIntersectable(new Sphere(
+    new Vec(0.0, 4.0, 0.0), 1, new Material(new Spectrum(0), new Spectrum(30, 20, 10))
+  ));
 }
 
 void initCamera() {
   camera.lookAt(
-    new Vec(4.0, 1.5, 6.0),  // 視点
+    new Vec(0.5, 1.0, 6.0),  // 視点
     new Vec(0.0),            // 注視点
     new Vec(0.0, 1.0, 0.0),  // 上方向
     radians(60.0),           // 視野角

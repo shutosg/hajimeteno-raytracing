@@ -1,5 +1,5 @@
 class Scene {
-  final int MAX_TRACE_DEPTH = 64;
+  final int MAX_TRACE_DEPTH = 16;
   final float VACUUM_REFRACTIVE_INDEX = 1.0; // 真空の屈折率
   ArrayList<Intersectable> objList = new ArrayList<Intersectable>();
   ArrayList<Light> lightList = new ArrayList<Light>();
@@ -18,6 +18,36 @@ class Scene {
     this.lightList.add(light);
   }
 
+
+  //==========================================================
+  // 交点からのレイの方向をランダムで決め追跡する
+  // rayDir: レイベクトル, p: 交点, n: 交点の法線, m: 物質のマテリアル, eta: 物質の屈折率の比, traceDepth: 反射回数
+  Spectrum intersectSurface(Vec rayDir, Vec p, Vec n, Material m, float eta, int traceDepth) {
+    float ks = m.reflective;
+    float kt = m.refractive;
+
+    float t = random(0.0, 1.0);
+    if(t <= ks) {
+      // 鏡面反射
+      Vec r = rayDir.reflect(n);
+      Spectrum col = trace(new Ray(p, r), traceDepth + 1);
+      return col.mul(m.diffuse);
+    } else if(t <= ks + kt) {
+      // 屈折
+      Vec r = rayDir.refract(n, eta);
+      Spectrum col = trace(new Ray(p, r), traceDepth + 1);
+      return col.mul(m.diffuse);
+    } else {
+      // 拡散反射
+      Vec r = n.randomHemisphere();
+      Spectrum li = trace(new Ray(p, r), traceDepth + 1);
+      Spectrum fr = m.diffuse.scale(1.0 / PI);
+      float factor = 2.0 * PI * n.dot(r);
+      Spectrum col = li.mul(fr).scale(factor);
+      return col;
+    }
+  }
+
   //==========================================================
   // レイを打って色を求める
   Spectrum trace(Ray ray, int traceDepth) {
@@ -29,18 +59,16 @@ class Scene {
     if(!isect.hit()) { return SKY_COLOR; }
 
     Material m = isect.material;
-    // Spectrum col = BLACK; // 最終的な計算結果
-
-    Vec r = isect.normal.randomHemisphere();
-    Spectrum li = trace(new Ray(isect.point, r, true), traceDepth + 1);
-
-    // 拡散反射
-    Spectrum fr = m.diffuse.scale(1.0 / PI);
-    float factor = 2.0 * PI * isect.normal.dot(r);
-    Spectrum col = li.mul(fr).scale(factor);
+    float dot = isect.normal.dot(ray.dir);
     
-
-    return col;
+    if(dot < 0) {
+      // 外部から内部へ
+      Spectrum col = intersectSurface(ray.dir, isect.point, isect.normal, m, VACUUM_REFRACTIVE_INDEX / m.refractiveIndex, traceDepth);
+      return col.add(m.emissive.scale(-dot));
+    } else {
+      // 内部から外部へ
+      return intersectSurface(ray.dir, isect.point, isect.normal.neg(), m, m.refractiveIndex / VACUUM_REFRACTIVE_INDEX, traceDepth);
+    }
   }
 
   //==========================================================
