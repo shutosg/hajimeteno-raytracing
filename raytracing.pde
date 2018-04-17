@@ -4,27 +4,24 @@ final Spectrum SKY_COLOR = new Spectrum(0.0, 0.02, 0.25);
 Scene scene = new Scene(); // シーン
 Camera camera = new Camera();
 
-int startTime;
+Timer timer = new Timer();
 
 void setup() {
   size(640, 360);
   initScene();
   initCamera();
-  startTime = millis();
+  timer.start();
 }
 
 int y = 0;
-
 void draw() {
   for (int x = 0; x < width; x ++) {
     color c = calcPixelColor(x, y);
     set(x, y, c);
   }
   y ++;
-  int elapsedSec = (millis() - startTime) / 1000;
-  float progress = ((float)y * width) / (width * height);
-  int remainingSec = (int)(elapsedSec / progress * (1 - progress));
-  println(String.format("%.4f %% Remaining: %dh %dm %ds", progress * 100, remainingSec / 3600, remainingSec / 60, remainingSec % 60));
+  timer.update(((float)y * width) / (width * height));
+  println(timer.getPrintOut());
   if (height <= y) {
     noLoop();
     Date c = new Date();
