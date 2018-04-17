@@ -1,13 +1,19 @@
 import java.util.Date;
-final int SAMPLE_NUM = 2000;
+final int SAMPLE_NUM = 4000;
 final Spectrum SKY_COLOR = new Spectrum(0.0, 0.02, 0.25);
 Scene scene = new Scene(); // シーン
 Camera camera = new Camera();
 
 Timer timer = new Timer();
+Spectrum[][] pixelBuffer;
+int sampleCount = 0;
 
 void setup() {
-  size(640, 360);
+  size(1920, 1080);
+  pixelBuffer = new Spectrum[width][height];
+  for(int i = 0; i < width; i++) {
+    for(int j = 0; j < height; j++) { pixelBuffer[i][j] = BLACK; }
+  }
   initScene();
   initCamera();
   timer.start();
@@ -15,14 +21,18 @@ void setup() {
 
 int y = 0;
 void draw() {
-  for (int x = 0; x < width; x ++) {
-    color c = calcPixelColor(x, y);
-    set(x, y, c);
+  for(int y = 0; y < height; y++) {
+    for(int x = 0; x < width; x++) {
+      pixelBuffer[x][y] = pixelBuffer[x][y].add(calcPixelSpectrum(x, y));
+      set(x, y, pixelBuffer[x][y].scale(1.0 / (sampleCount + 1)).toColor());
+    }
   }
-  y ++;
-  timer.update(((float)y * width) / (width * height));
+
+  sampleCount++;
+  timer.update(((float)sampleCount / SAMPLE_NUM));
   println(timer.getPrintOut());
-  if (height <= y) {
+
+  if(SAMPLE_NUM <= sampleCount) {
     noLoop();
     Date c = new Date();
     save(String.format("render_%tY%tm%td%tH%tM.png", c, c, c, c, c));
@@ -70,7 +80,7 @@ void initScene() {
   scene.addIntersectable(new Sphere(
     new Vec(0.5, -0.95, 0.5), 0.1, new Material(new Spectrum(0), new Spectrum(30, 20, 10))
   ));
-  for(int i = 0; i < 30; i++) {
+  for(int i = 0; i < 40; i++) {
     scene.addIntersectable(new Sphere(
       new Vec(random(-3.0, 3.0), random(-0.9, 2.0), random(2.0, -15.0)), random(0.001, 0.1), new Material(new Spectrum(0), new Spectrum(30, 20, 10).scale(random(0.1, 1.5)))
     ));
@@ -105,4 +115,10 @@ color calcPixelColor(int x, int y) {
     sum = sum.add(scene.trace(ray, 0));
   }
   return sum.scale(1.0 / SAMPLE_NUM).toColor();
+}
+
+// ピクセルの色を計算
+Spectrum calcPixelSpectrum(int x, int y) {
+  Ray ray = getPrimaryRay(x, y);
+  return scene.trace(ray, 0);
 }
