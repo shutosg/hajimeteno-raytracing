@@ -18,6 +18,6 @@ class Timer {
   }
 
   String getPrintOut() {
-    return String.format("%.4f %% Remaining: %dh %dm %ds", progress * 100, remainingSec / 3600, remainingSec / 60, remainingSec % 60);
+    return String.format("%.4f %% Remaining: %dh %dm %ds", progress * 100, remainingSec / 3600, remainingSec % 3600 / 60, remainingSec % 60);
   }
 }
