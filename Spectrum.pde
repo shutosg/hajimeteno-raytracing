@@ -34,7 +34,10 @@ class Spectrum {
     int ib = (int)min(pow(this.b, 1.0 / DISPLAY_GAMMA) * 255, 255);
     return color(ir, ig, ib);
   }
-  
+  // スペクトラムを文字列として返す
+  String toString() {
+    return "Spectrum(" + this.r + ", " + this.g + ", " + this.b + ")";
+  }
 }
 final float DISPLAY_GAMMA = 2.2;
 final Spectrum BLACK = new Spectrum(0);

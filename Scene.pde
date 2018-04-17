@@ -30,17 +30,17 @@ class Scene {
     if(t <= ks) {
       // 鏡面反射
       Vec r = rayDir.reflect(n);
-      Spectrum col = trace(new Ray(p, r), traceDepth + 1);
+      Spectrum col = trace(new Ray(p, r, true), traceDepth + 1);
       return col.mul(m.diffuse);
     } else if(t <= ks + kt) {
       // 屈折
       Vec r = rayDir.refract(n, eta);
-      Spectrum col = trace(new Ray(p, r), traceDepth + 1);
+      Spectrum col = trace(new Ray(p, r, true), traceDepth + 1);
       return col.mul(m.diffuse);
     } else {
       // 拡散反射
       Vec r = n.randomHemisphere();
-      Spectrum li = trace(new Ray(p, r), traceDepth + 1);
+      Spectrum li = trace(new Ray(p, r, true), traceDepth + 1);
       Spectrum fr = m.diffuse.scale(1.0 / PI);
       float factor = 2.0 * PI * n.dot(r);
       Spectrum col = li.mul(fr).scale(factor);
