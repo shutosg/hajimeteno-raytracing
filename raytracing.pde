@@ -1,6 +1,5 @@
 import java.util.Date;
-final int SAMPLE_NUM = 1000;
-final int DOF_NUM = 8;
+final int SAMPLE_NUM = 2000;
 final Spectrum SKY_COLOR = new Spectrum(0.0, 0.02, 0.25);
 Scene scene = new Scene(); // シーン
 Camera camera = new Camera();
@@ -103,18 +102,10 @@ Ray getPrimaryRay(int x, int y) {
 
 // ピクセルの色を計算
 color calcPixelColor(int x, int y) {
-  Spectrum dofsum = BLACK;
-  for(int j = 0; j < DOF_NUM; j++) {
-    Spectrum sum = BLACK;
-    for(int i = 0; i < SAMPLE_NUM; i++) {
-      Ray ray = getPrimaryRay(x, y);
-      sum = sum.add(scene.trace(ray, 0));
-    }
-    dofsum = dofsum.add(sum.scale(1.0 / SAMPLE_NUM));
-    if(camera.lensRadius == 0) {
-      dofsum = dofsum.scale(DOF_NUM);
-      break;
-    }
+  Spectrum sum = BLACK;
+  for(int i = 0; i < SAMPLE_NUM; i++) {
+    Ray ray = getPrimaryRay(x, y);
+    sum = sum.add(scene.trace(ray, 0));
   }
-  return dofsum.scale(1.0 / DOF_NUM).toColor();
+  return sum.scale(1.0 / SAMPLE_NUM).toColor();
 }
