@@ -20,4 +20,9 @@ class Timer {
   String getPrintOut() {
     return String.format("%.4f %% Remaining: %dh %dm %ds", progress * 100, remainingSec / 3600, remainingSec % 3600 / 60, remainingSec % 60);
   }
+
+  String getFinalPrintOut() {
+    int resultSec = (millis() - startTime) / 1000;
+    return String.format("Render Time: %dh %dm %ds", resultSec / 3600, resultSec % 3600 / 60, resultSec % 60);
+  }
 }

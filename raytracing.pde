@@ -1,6 +1,6 @@
 import java.util.Date;
-final int SAMPLE_NUM = 4000;
-final Spectrum SKY_COLOR = new Spectrum(0.0, 0.02, 0.25);
+final int SAMPLE_NUM = 8000;
+final Spectrum SKY_COLOR = new Spectrum(0.0, 0.0025, 0.01);
 Scene scene = new Scene(); // シーン
 Camera camera = new Camera();
 
@@ -34,6 +34,7 @@ void draw() {
 
   if(SAMPLE_NUM <= sampleCount) {
     noLoop();
+    println(timer.getFinalPrintOut());
     Date c = new Date();
     save(String.format("render_%tY%tm%td%tH%tM.png", c, c, c, c, c));
   }
@@ -61,10 +62,10 @@ void initScene() {
     new Plane(
       new Vec(0, -1, 0), // 位置
       new Vec(0, 1, 0), // 向き
-      new Material(new Spectrum(0.8)) // 材質
+      new Material(new Spectrum(0.98), 0.5) // 材質
     ),
     2,
-    new Material(new Spectrum(0.2))
+    new Material(new Spectrum(0.02), 0.8)
   ));
 
   // 光源
@@ -82,7 +83,7 @@ void initScene() {
   ));
   for(int i = 0; i < 40; i++) {
     scene.addIntersectable(new Sphere(
-      new Vec(random(-3.0, 3.0), random(-0.9, 2.0), random(2.0, -15.0)), random(0.001, 0.1), new Material(new Spectrum(0), new Spectrum(30, 20, 10).scale(random(0.1, 1.5)))
+      new Vec(random(-3.0, 3.0), random(-0.9, 2.0), random(2.0, -15.0)), random(0.0001, 0.05), new Material(new Spectrum(0), new Spectrum(random(10, 30), 20, random(10, 30)).scale(random(0.1, 1.5)))
     ));
   }
 }
